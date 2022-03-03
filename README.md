@@ -32,3 +32,11 @@ credentials and host url.
 
 5. Configure `kubectl` by running `gcloud container clusters get-credentials cloud-native-integrations-team-gke --zone us-central1-c --project elastic-observability`
 6. Check the cluster `kubectl get node`, `kubectl get pod -A`
+
+### Put load on the cluster
+1. `cd scripts`
+2. `go build`
+3. `./stress_test_k8s --kubeconfig=<path> --deployments=4 --namespaces=2`
+
+The above command will create 2 namespaces and deploy one demo nginx deployment in each one with
+as many replicas as indicated in the `deployments` flag.
