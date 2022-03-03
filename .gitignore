@@ -1,3 +1,4 @@
 */stress_test_k8s
 */.terraform
+*/.terraform.lock.hcl
 
