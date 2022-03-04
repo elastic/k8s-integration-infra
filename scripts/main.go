@@ -4,7 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 	"path/filepath"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -32,6 +34,9 @@ var deployment = &appsv1.Deployment{
 				Labels: map[string]string{
 					"app": "demo",
 				},
+				Annotations: map[string]string{
+					"key": "val",
+				},
 			},
 			Spec: apiv1.PodSpec{
 				Containers: []apiv1.Container{
@@ -53,6 +58,7 @@ var deployment = &appsv1.Deployment{
 }
 
 func main() {
+	// parse flags
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -61,7 +67,11 @@ func main() {
 	}
 	replicas := flag.Int("deployments", 2, "number of deployments replicas per namespace")
 	namespaces := flag.Int("namespaces", 1, "number of namespaces")
+	podLabels := flag.Int("podlabels", 1, "number of labels per pod")
+	podAnnotations := flag.Int("podannotations", 1, "number of annotations per pod")
+	delAll := flag.Bool("delete", false, "delete all")
 	flag.Parse()
+
 	// use the current context in kubeconfig
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
@@ -72,7 +82,13 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-
+	if *delAll {
+		err = deleteNamespaces(client)
+		if err != nil {
+			panic(err)
+		}
+		os.Exit(1)
+	}
 	// Create namespaces and deployment per namespace
 	for i := 1; i <= *namespaces; i++ {
 		Nname := fmt.Sprintf("demo-%d", i)
@@ -82,7 +98,7 @@ func main() {
 		}
 
 		Dname := fmt.Sprintf("demo-deployment-%d", i)
-		err = createOrUpdateDeployment(Dname, Nname, client, *replicas)
+		err = createOrUpdateDeployment(Dname, Nname, client, *replicas, *podLabels, *podAnnotations)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -108,8 +124,30 @@ func createNamespace(name string, client *kubernetes.Clientset) error {
 	return nil
 }
 
-// createOrUpdateDeployment creates a new namespace if it does not exist or updates it ifit does
-func createOrUpdateDeployment(name, namespace string, client *kubernetes.Clientset, replicas int) error {
+// deleteNamespaces creates a new namespace if it does not exist
+func deleteNamespaces(client *kubernetes.Clientset) error {
+	//nsSpec := &apiv1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: name}}
+	nsClient := client.CoreV1().Namespaces()
+	res, getErr := nsClient.List(context.TODO(), metav1.ListOptions{})
+	if getErr != nil {
+		return getErr
+	} else {
+		for _, n := range res.Items {
+			if strings.Contains(n.Name, "demo-") {
+				err := nsClient.Delete(context.TODO(), n.Name, metav1.DeleteOptions{})
+				if err != nil {
+					return err
+				}
+				fmt.Printf("Namespace %s deleted\n", n.Name)
+			}
+		}
+
+	}
+	return nil
+}
+
+// createOrUpdateDeployment creates a new namespace if it does not exist or updates it if it does
+func createOrUpdateDeployment(name, namespace string, client *kubernetes.Clientset, replicas, podLabels, podAnnotations int) error {
 	deploymentsClient := client.AppsV1().Deployments(namespace)
 	result, getErr := deploymentsClient.Get(context.TODO(), name, metav1.GetOptions{})
 	if getErr != nil {
@@ -118,6 +156,16 @@ func createOrUpdateDeployment(name, namespace string, client *kubernetes.Clients
 		fmt.Println("Creating deployment...")
 		deployment.Name = name
 		deployment.Spec.Replicas = int32Ptr(int32(replicas))
+		for i := 1; i <= podLabels; i++ {
+			lkey := fmt.Sprintf("app-%d", i)
+			lval := fmt.Sprintf("demo-%d", i)
+			deployment.Spec.Template.Labels[lkey] = lval
+		}
+		for i := 1; i <= podAnnotations; i++ {
+			ankey := fmt.Sprintf("key-%d", i)
+			anval := fmt.Sprintf("val-%d", i)
+			deployment.Spec.Template.Annotations[ankey] = anval
+		}
 		result, err := deploymentsClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
 		if err != nil {
 			return err
@@ -130,6 +178,16 @@ func createOrUpdateDeployment(name, namespace string, client *kubernetes.Clients
 			// RetryOnConflict uses exponential backoff to avoid exhausting the apiserver
 
 			result.Spec.Replicas = int32Ptr(int32(replicas)) // update replica count
+			for i := 1; i <= podLabels; i++ {
+				lkey := fmt.Sprintf("app-%d", i)
+				lval := fmt.Sprintf("demo-%d", i)
+				result.Spec.Template.Labels[lkey] = lval
+			}
+			for i := 1; i <= podAnnotations; i++ {
+				ankey := fmt.Sprintf("key-%d", i)
+				anval := fmt.Sprintf("val-%d", i)
+				result.Spec.Template.Annotations[ankey] = anval
+			}
 			_, updateErr := deploymentsClient.Update(context.TODO(), result, metav1.UpdateOptions{})
 			return updateErr
 		})
