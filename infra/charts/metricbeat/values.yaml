@@ -69,27 +69,6 @@ daemonset:
         enabled: true
         metricsets:
           - event
-      - module: system
-        period: 10s
-        metricsets:
-          - cpu
-          - load
-          - memory
-          - network
-          - process
-          - process_summary
-        processes: ['.*']
-        process.include_top_n:
-          by_cpu: 5
-          by_memory: 5
-      - module: system
-        period: 1m
-        metricsets:
-          - filesystem
-          - fsstat
-        processors:
-        - drop_event.when.regexp:
-            system.filesystem.mount_point: '^/(sys|cgroup|proc|dev|etc|host|lib)($|/)'
       output.elasticsearch:
         hosts: '${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}'
         username: '${ELASTICSEARCH_USERNAME}'
