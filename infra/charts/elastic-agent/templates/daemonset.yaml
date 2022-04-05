@@ -3,9 +3,9 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ template "metricbeat.fullname" . }}
+  name: {{ template "elastic-agent.fullname" . }}
   labels:
-    app: "{{ template "metricbeat.fullname" . }}"
+    app: "{{ template "elastic-agent.fullname" . }}"
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service | quote }}
     release: {{ .Release.Name | quote }}
@@ -27,7 +27,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: "{{ template "metricbeat.fullname" . }}"
+      app: "{{ template "elastic-agent.fullname" . }}"
       release: {{ .Release.Name | quote }}
   updateStrategy:
     type: {{ .Values.updateStrategy }}
@@ -38,12 +38,12 @@ spec:
         {{ $key }}: {{ $value | quote }}
         {{- end }}
         {{/* This forces a restart if the configmap has changed */}}
-        {{- if or  .Values.metricbeatConfig .Values.daemonset.metricbeatConfig }}
+        {{- if or  .Values.elasticAgentConfig .Values.daemonset.agentConfig }}
         configChecksum: {{ include (print .Template.BasePath "/configmap.yaml") . | sha256sum | trunc 63 }}
         {{- end }}
-      name: "{{ template "metricbeat.fullname" . }}"
+      name: "{{ template "elastic-agent.fullname" . }}"
       labels:
-        app: "{{ template "metricbeat.fullname" . }}"
+        app: "{{ template "elastic-agent.fullname" . }}"
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         heritage: {{ .Release.Service | quote }}
         release: {{ .Release.Name | quote }}
@@ -67,7 +67,7 @@ spec:
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName  }}
       {{- end }}
-      serviceAccountName: {{ template "metricbeat.serviceAccount" . }}
+      serviceAccountName: {{ template "elastic-agent.serviceAccount" . }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriod }}
       {{- if .Values.daemonset.hostAliases }}
       hostAliases: {{ toYaml .Values.daemonset.hostAliases | nindent 6 }}
@@ -78,30 +78,29 @@ spec:
         secret:
           secretName: {{ .secretName }}
       {{- end }}
-      {{- if .Values.metricbeatConfig }}
-      - name: metricbeat-config
+      {{- if .Values.elasticAgentConfig }}
+      - name: elastic-agent
         configMap:
-          defaultMode: 0600
-          name: {{ template "metricbeat.fullname" . }}-config
-      {{- else if .Values.daemonset.metricbeatConfig }}
-      - name: metricbeat-config
+          defaultMode: 0640
+          name: {{ template "elastic-agent.fullname" . }}-config
+      {{- else if .Values.daemonset.agentConfig }}
+      - name: datastreams
         configMap:
-          defaultMode: 0600
-          name: {{ template "metricbeat.fullname" . }}-daemonset-config
+          defaultMode: 0640
+          name: {{ template "elastic-agent.fullname" . }}-daemonset-config
       {{- end }}
-      - name: data
-        hostPath:
-          path: {{ .Values.hostPathRoot }}/{{ template "metricbeat.fullname" . }}-{{ .Release.Namespace }}-data
-          type: DirectoryOrCreate
-      - name: varrundockersock
-        hostPath:
-          path: /var/run/docker.sock
       - name: proc
         hostPath:
           path: /proc
       - name: cgroup
         hostPath:
           path: /sys/fs/cgroup
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: varlog
+        hostPath:
+          path: /var/log
       {{- if .Values.extraVolumes | default .Values.daemonset.extraVolumes }}
 {{ toYaml ( .Values.extraVolumes | default .Values.daemonset.extraVolumes ) | indent 6 }}
       {{- end }}
@@ -114,33 +113,32 @@ spec:
 {{ tpl .Values.extraInitContainers . | indent 6 }}
       {{- end }}
       containers:
-      - name: "metricbeat"
+      - name: "elastic-agent"
         image: "{{ .Values.image }}:{{ .Values.imageTag }}"
         imagePullPolicy: "{{ .Values.imagePullPolicy }}"
-        args:
-        - "-e"
-        - "-E"
-        - "http.enabled=true"
-        - "--system.hostfs=/hostfs"
+        args: [
+            "-c", "/etc/agent.yml",
+            "-e",
+        ]
         livenessProbe:
 {{ toYaml .Values.livenessProbe | indent 10 }}
         readinessProbe:
 {{ toYaml .Values.readinessProbe | indent 10 }}
         resources: {{ toYaml ( .Values.resources | default .Values.daemonset.resources ) | nindent 10 }}
         env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
         - name: NODE_NAME
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: KUBE_STATE_METRICS_HOSTS
           {{- if .Values.kube_state_metrics.enabled }}
           value: "$({{ .Release.Name | replace "-" "_" | upper }}_KUBE_STATE_METRICS_SERVICE_HOST):$({{ .Release.Name | replace "-" "_" | upper }}_KUBE_STATE_METRICS_SERVICE_PORT_HTTP)"
           {{- else }}
-          value: { { .Values.kube_state_metrics.host | default "kube-state-metrics:8080" } }
+          value: {{ .Values.kube_state_metrics.host | default "kube-state-metrics:8080" }}
           {{- end }}
 {{- if .Values.extraEnvs | default .Values.daemonset.extraEnvs }}
 {{ toYaml ( .Values.extraEnvs | default .Values.daemonset.extraEnvs ) | indent 8 }}
@@ -155,31 +153,30 @@ spec:
           subPath: {{ .subPath }}
           {{- end }}
         {{- end }}
-        {{- range $path, $config := .Values.metricbeatConfig }}
-        - name: metricbeat-config
-          mountPath: /usr/share/metricbeat/{{ $path }}
+        {{- range $path, $config := .Values.elasticAgentConfig }}
+        - name: elastic-agent-config
+          mountPath: /etc/{{ $path }}
           readOnly: true
           subPath: {{ $path }}
         {{ else }}
-        {{- range $path, $config := .Values.daemonset.metricbeatConfig }}
-        - name: metricbeat-config
-          mountPath: /usr/share/metricbeat/{{ $path }}
+        {{- range $path, $config := .Values.daemonset.agentConfig }}
+        - name: datastreams
+          mountPath: /etc/agent.yml
           readOnly: true
-          subPath: {{ $path }}
+          subPath: agent.yml
         {{- end }}
         {{- end }}
-        - name: data
-          mountPath: /usr/share/metricbeat/data
-        # Necessary when using autodiscovery; avoid mounting it otherwise
-        # See: https://www.elastic.co/guide/en/beats/metricbeat/master/configuration-autodiscover.html
-        - name: varrundockersock
-          mountPath: /var/run/docker.sock
-          readOnly: true
         - name: proc
           mountPath: /hostfs/proc
           readOnly: true
         - name: cgroup
           mountPath: /hostfs/sys/fs/cgroup
+          readOnly: true
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: varlog
+          mountPath: /var/log
           readOnly: true
         {{- if .Values.extraVolumeMounts | default .Values.daemonset.extraVolumeMounts }}
 {{ toYaml ( .Values.extraVolumeMounts | default .Values.daemonset.extraVolumeMounts ) | indent 8 }}

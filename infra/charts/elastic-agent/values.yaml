@@ -1,0 +1,698 @@
+---
+daemonset:
+  # Annotations to apply to the daemonset
+  annotations: {}
+  # additionals labels
+  labels: {}
+  affinity: {}
+  # Include the daemonset
+  enabled: true
+  # Extra environment variables for elastic-agent container.
+  envFrom: []
+  # - configMapRef:
+  #     name: config-secret
+  extraEnvs:
+    - name: "ES_HOST"
+      valueFrom:
+        secretKeyRef:
+          name: elasticsearch-host
+          key: host
+    - name: "ES_USERNAME"
+      valueFrom:
+        secretKeyRef:
+          name: elasticsearch-credentials
+          key: username
+    - name: "ES_PASSWORD"
+      valueFrom:
+        secretKeyRef:
+          name: elasticsearch-credentials
+          key: password
+  #  - name: MY_ENVIRONMENT_VAR
+  #    value: the_value_goes_here
+  extraVolumes: []
+  # - name: extras
+  #   emptyDir: {}
+  extraVolumeMounts: []
+  # - name: extras
+  #   mountPath: /usr/share/extras
+  #   readOnly: true
+  hostAliases: []
+  #- ip: "127.0.0.1"
+  #  hostnames:
+  #  - "foo.local"
+  #  - "bar.local"
+  hostNetworking: false
+  # Allows you to add any config files in /usr/share/elastic-agent
+  # such as agent.yml for daemonset
+  agentConfig:
+    agent.yml: |
+      outputs:
+        default:
+          type: elasticsearch
+          hosts:
+            - >-
+              ${ES_HOST}
+          username: ${ES_USERNAME}
+          password: ${ES_PASSWORD}
+      agent:
+        monitoring:
+          enabled: true
+          use_output: default
+          logs: true
+          metrics: true
+      providers.kubernetes:
+        node: ${NODE_NAME}
+        scope: node
+      inputs:
+        - name: kubernetes-cluster-metrics
+          condition: ${kubernetes_leaderelection.leader} == true
+          type: kubernetes/metrics
+          use_output: default
+          meta:
+            package:
+              name: kubernetes
+              version: 1.9.0
+          data_stream:
+            namespace: default
+          streams:
+            - data_stream:
+                dataset: kubernetes.apiserver
+                type: metrics
+              metricsets:
+                - apiserver
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              hosts:
+                - 'https://${env.KUBERNETES_SERVICE_HOST}:${env.KUBERNETES_SERVICE_PORT}'
+              period: 30s
+              ssl.certificate_authorities:
+                - /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - data_stream:
+                dataset: kubernetes.event
+                type: metrics
+              metricsets:
+                - event
+              period: 10s
+              add_metadata: true
+            - data_stream:
+                dataset: kubernetes.state_container
+                type: metrics
+              metricsets:
+                - state_container
+              add_metadata: true
+              hosts:
+                - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+              # If `https` is used to access `kube-state-metrics`, then to all `kubernetes.state_*` datasets should be added:
+              # bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              # ssl.certificate_authorities:
+              #   - /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+            - data_stream:
+                dataset: kubernetes.state_cronjob
+                type: metrics
+              metricsets:
+                - state_cronjob
+              add_metadata: true
+              hosts:
+                - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_daemonset
+                type: metrics
+              metricsets:
+                - state_daemonset
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_deployment
+                type: metrics
+              metricsets:
+                - state_deployment
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_job
+                type: metrics
+              metricsets:
+                - state_job
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_node
+                type: metrics
+              metricsets:
+                - state_node
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_persistentvolume
+                type: metrics
+              metricsets:
+                - state_persistentvolume
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_persistentvolumeclaim
+                type: metrics
+              metricsets:
+                - state_persistentvolumeclaim
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_pod
+                type: metrics
+              metricsets:
+                - state_pod
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_replicaset
+                type: metrics
+              metricsets:
+                - state_replicaset
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_resourcequota
+                type: metrics
+              metricsets:
+                - state_resourcequota
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_service
+                type: metrics
+              metricsets:
+                - state_service
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_statefulset
+                type: metrics
+              metricsets:
+                - state_statefulset
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.state_storageclass
+                type: metrics
+              metricsets:
+                - state_storageclass
+              add_metadata: true
+              hosts:
+               - '${env.KUBE_STATE_METRICS_HOSTS}'
+              period: 10s
+        - name: system-logs
+          type: logfile
+          use_output: default
+          meta:
+            package:
+              name: system
+              version: 0.10.7
+          data_stream:
+            namespace: default
+          streams:
+            - data_stream:
+                dataset: system.auth
+                type: logs
+              paths:
+                - /var/log/auth.log*
+                - /var/log/secure*
+              exclude_files:
+                - .gz$
+              multiline:
+                pattern: ^\s
+                match: after
+              processors:
+                - add_fields:
+                    target: ''
+                    fields:
+                      ecs.version: 1.12.0
+            - data_stream:
+                dataset: system.syslog
+                type: logs
+              paths:
+                - /var/log/messages*
+                - /var/log/syslog*
+              exclude_files:
+                - .gz$
+              multiline:
+                pattern: ^\s
+                match: after
+              processors:
+                - add_fields:
+                    target: ''
+                    fields:
+                      ecs.version: 1.12.0
+        - name: container-log
+          type: filestream
+          use_output: default
+          meta:
+            package:
+              name: kubernetes
+              version: 1.9.0
+          data_stream:
+            namespace: default
+          streams:
+            - data_stream:
+                dataset: kubernetes.container_logs
+                type: logs
+              prospector.scanner.symlinks: true
+              parsers:
+                - container: ~
+                # - ndjson:
+                #     target: json
+                # - multiline:
+                #     type: pattern
+                #     pattern: '^\['
+                #     negate: true
+                #     match: after
+              paths:
+                - /var/log/containers/*${kubernetes.container.id}.log
+        - name: audit-log
+          type: filestream
+          use_output: default
+          meta:
+            package:
+              name: kubernetes
+              version: 1.9.0
+          data_stream:
+            namespace: default
+          streams:
+            - data_stream:
+                dataset: kubernetes.audit_logs
+                type: logs
+              exclude_files:
+              - .gz$
+              parsers:
+                - ndjson:
+                    add_error_key: true
+                    target: kubernetes_audit
+              paths:
+                - /var/log/kubernetes/kube-apiserver-audit.log
+                # The default path of audit logs on Openshift:
+                # - /var/log/kube-apiserver/audit.log
+              processors:
+              - rename:
+                  fields:
+                  - from: kubernetes_audit
+                    to: kubernetes.audit
+              - script:
+                  id: dedot_annotations
+                  lang: javascript
+                  source: |
+                    function process(event) {
+                      var audit = event.Get("kubernetes.audit");
+                      for (var annotation in audit["annotations"]) {
+                        var annotation_dedoted = annotation.replace(/\./g,'_')
+                        event.Rename("kubernetes.audit.annotations."+annotation, "kubernetes.audit.annotations."+annotation_dedoted)
+                      }
+                      return event;
+                    } function test() {
+                      var event = process(new Event({ "kubernetes": { "audit": { "annotations": { "authorization.k8s.io/decision": "allow", "authorization.k8s.io/reason": "RBAC: allowed by ClusterRoleBinding \"system:kube-scheduler\" of ClusterRole \"system:kube-scheduler\" to User \"system:kube-scheduler\"" } } } }));
+                      if (event.Get("kubernetes.audit.annotations.authorization_k8s_io/decision") !== "allow") {
+                          throw "expected kubernetes.audit.annotations.authorization_k8s_io/decision === allow";
+                      }
+                    }
+        - name: system-metrics
+          type: system/metrics
+          use_output: default
+          meta:
+            package:
+              name: system
+              version: 0.10.9
+          data_stream:
+            namespace: default
+          streams:
+            - data_stream:
+                dataset: system.core
+                type: metrics
+              metricsets:
+                - core
+              core.metrics:
+                - percentages
+            - data_stream:
+                dataset: system.cpu
+                type: metrics
+              period: 10s
+              cpu.metrics:
+                - percentages
+                - normalized_percentages
+              metricsets:
+                - cpu
+            - data_stream:
+                dataset: system.diskio
+                type: metrics
+              period: 10s
+              diskio.include_devices: null
+              metricsets:
+                - diskio
+            - data_stream:
+                dataset: system.filesystem
+                type: metrics
+              period: 1m
+              metricsets:
+                - filesystem
+              processors:
+                - drop_event.when.regexp:
+                    system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+            - data_stream:
+                dataset: system.fsstat
+                type: metrics
+              period: 1m
+              metricsets:
+                - fsstat
+              processors:
+                - drop_event.when.regexp:
+                    system.fsstat.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+            - data_stream:
+                dataset: system.load
+                type: metrics
+              period: 10s
+              metricsets:
+                - load
+            - data_stream:
+                dataset: system.memory
+                type: metrics
+              period: 10s
+              metricsets:
+                - memory
+            - data_stream:
+                dataset: system.network
+                type: metrics
+              period: 10s
+              network.interfaces: null
+              metricsets:
+                - network
+            - data_stream:
+                dataset: system.process
+                type: metrics
+              process.include_top_n.by_memory: 5
+              period: 10s
+              processes:
+                - .*
+              process.include_top_n.by_cpu: 5
+              process.cgroups.enabled: false
+              process.cmdline.cache.enabled: true
+              metricsets:
+                - process
+              process.include_cpu_ticks: false
+              system.hostfs: /hostfs
+            - data_stream:
+                dataset: system.process_summary
+                type: metrics
+              period: 10s
+              metricsets:
+                - process_summary
+              system.hostfs: /hostfs
+            - data_stream:
+                dataset: system.socket_summary
+                type: metrics
+              period: 10s
+              metricsets:
+                - socket_summary
+              system.hostfs: /hostfs
+        - name: kubernetes-node-metrics
+          type: kubernetes/metrics
+          use_output: default
+          meta:
+            package:
+              name: kubernetes
+              version: 1.9.0
+          data_stream:
+            namespace: default
+          streams:
+            - data_stream:
+                dataset: kubernetes.controllermanager
+                type: metrics
+              metricsets:
+                - controllermanager
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              hosts:
+                - 'https://${kubernetes.pod.ip}:10257'
+              period: 10s
+              ssl.verification_mode: none
+              condition: ${kubernetes.labels.component} == 'kube-controller-manager'
+              # Openshift:
+              # condition: ${kubernetes.labels.app} == 'kube-controller-manager'
+            - data_stream:
+                dataset: kubernetes.scheduler
+                type: metrics
+              metricsets:
+                - scheduler
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              hosts:
+                - 'https://${kubernetes.pod.ip}:10259'
+              period: 10s
+              ssl.verification_mode: none
+              condition: ${kubernetes.labels.component} == 'kube-scheduler'
+              # Openshift:
+              # condition: ${kubernetes.labels.app} == 'openshift-kube-scheduler'
+            - data_stream:
+                dataset: kubernetes.proxy
+                type: metrics
+              metricsets:
+                - proxy
+              hosts:
+                - 'localhost:10249'
+                # Openshift:
+                # - 'localhost:29101'
+              period: 10s
+            - data_stream:
+                dataset: kubernetes.container
+                type: metrics
+              metricsets:
+                - container
+              add_metadata: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              hosts:
+                - 'https://${env.NODE_NAME}:10250'
+              period: 10s
+              ssl.verification_mode: none
+              # On Openshift ssl configuration must be replaced:
+              # bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              # ssl.certificate_authorities:
+              #   - /path/to/ca-bundle.crt
+            - data_stream:
+                dataset: kubernetes.node
+                type: metrics
+              metricsets:
+                - node
+              add_metadata: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              hosts:
+                - 'https://${env.NODE_NAME}:10250'
+              period: 10s
+              ssl.verification_mode: none
+              # On Openshift ssl configuration must be replaced:
+              # bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              # ssl.certificate_authorities:
+              #   - /path/to/ca-bundle.crt
+            - data_stream:
+                dataset: kubernetes.pod
+                type: metrics
+              metricsets:
+                - pod
+              add_metadata: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              hosts:
+                - 'https://${env.NODE_NAME}:10250'
+              period: 10s
+              ssl.verification_mode: none
+              # On Openshift ssl configuration must be replaced:
+              # bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              # ssl.certificate_authorities:
+              #   - /path/to/ca-bundle.crt
+            - data_stream:
+                dataset: kubernetes.system
+                type: metrics
+              metricsets:
+                - system
+              add_metadata: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              hosts:
+                - 'https://${env.NODE_NAME}:10250'
+              period: 10s
+              ssl.verification_mode: none
+              # On Openshift ssl configuration must be replaced:
+              # bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              # ssl.certificate_authorities:
+              #   - /path/to/ca-bundle.crt
+            - data_stream:
+                dataset: kubernetes.volume
+                type: metrics
+              metricsets:
+                - volume
+              add_metadata: true
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              hosts:
+                - 'https://${env.NODE_NAME}:10250'
+              period: 10s
+              ssl.verification_mode: none
+              # On Openshift ssl configuration must be replaced:
+              # bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              # ssl.certificate_authorities:
+              #   - /path/to/ca-bundle.crt
+
+  nodeSelector: {}
+  # A list of secrets and their paths to mount inside the pod
+  # This is useful for mounting certificates for security other sensitive values
+  secretMounts: []
+
+  securityContext:
+    runAsUser: 0
+    privileged: false
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "400Mi"
+    limits:
+      cpu: "1000m"
+      memory: "700Mi"
+  tolerations: []
+
+
+extraContainers: ""
+# - name: dummy-init
+#   image: busybox
+#   command: ['echo', 'hey']
+
+extraInitContainers: ""
+# - name: dummy-init
+#   image: busybox
+#   command: ['echo', 'hey']
+
+# Root directory where elastic-agent will write data to in order to persist registry data across pod restarts (file position and other metadata).
+hostPathRoot: /var/lib
+
+image: "docker.elastic.co/beats/elastic-agent"
+imageTag: "8.0.0-SNAPSHOT"
+imagePullPolicy: "IfNotPresent"
+imagePullSecrets: []
+
+# Whether this chart should self-manage its service account, role, and associated role binding.
+managedServiceAccount: true
+
+clusterRoleRules:
+  - apiGroups: [ "" ]
+    resources:
+      - nodes
+      - namespaces
+      - events
+      - pods
+      - services
+      - configmaps
+    verbs: [ "get", "list", "watch" ]
+  # Enable this rule only if planing to use kubernetes_secrets provider
+  #- apiGroups: [""]
+  #  resources:
+  #  - secrets
+  #  verbs: ["get"]
+  - apiGroups: [ "extensions" ]
+    resources:
+      - replicasets
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "apps" ]
+    resources:
+      - statefulsets
+      - deployments
+      - replicasets
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "batch" ]
+    resources:
+      - jobs
+      - cronjobs
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/stats
+    verbs:
+      - get
+  # required for apiserver
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
+
+podAnnotations: {}
+# iam.amazonaws.com/role: es-cluster
+
+# Custom service account override that the pod will use
+serviceAccount: ""
+
+# Annotations to add to the ServiceAccount that is created if the serviceAccount value isn't set.
+serviceAccountAnnotations: {}
+# eks.amazonaws.com/role-arn: arn:aws:iam::111111111111:role/k8s.clustername.namespace.serviceaccount
+
+# How long to wait for elastic-agent pods to stop gracefully
+terminationGracePeriod: 30
+
+# This is the PriorityClass settings as defined in
+# https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+priorityClassName: ""
+
+updateStrategy: RollingUpdate
+
+# Override various naming aspects of this chart
+# Only edit these if you know what you're doing
+nameOverride: ""
+fullnameOverride: ""
+
+kube_state_metrics:
+  enabled: false
+  # host is used only when kube_state_metrics.enabled: false
+  host: "metricbeat-kube-state-metrics:8080"
+
+# Add sensitive data to k8s secrets
+secrets: []
+#  - name: "elasticsearch-master-credentials"
+#    value:
+#      username: "elastic"
+#      password: pass
+##  - name: "tls"
+#    value:
+#      ca.crt: |
+#        LS0tLS1CRUdJT0K
+#        LS0tLS1CRUdJT0K
+#        LS0tLS1CRUdJT0K
+#        LS0tLS1CRUdJT0K
+#      cert.crt: "LS0tLS1CRUdJTiBlRJRklDQVRFLS0tLS0K"
+#      cert.key.filepath: "secrets.crt" # The path to file should be relative to the `values.yaml` file.
+
+# DEPRECATED
+affinity: {}
+envFrom: []
+extraEnvs: []
+extraVolumes: []
+extraVolumeMounts: []
+# Allows you to add any config files in /usr/share/elastic-agent
+# such as elastic-agent.yml for both daemonset and deployment
+elasticAgentConfig: {}
+nodeSelector: {}
+podSecurityContext: {}
+resources: {}
+secretMounts: []
+tolerations: []
+labels: {}

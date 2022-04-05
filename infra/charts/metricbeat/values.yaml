@@ -46,6 +46,33 @@ daemonset:
   # such as metricbeat.yml for daemonset
   metricbeatConfig:
     metricbeat.yml: |
+      metricbeat.autodiscover:
+        providers:
+          - type: kubernetes
+            scope: cluster
+            node: ${NODE_NAME}
+            # In large Kubernetes clusters consider setting unique to false
+            # to avoid using the leader election strategy and
+            # instead run a dedicated Metricbeat instance using a Deployment in addition to the DaemonSet
+            unique: true
+            templates:
+              - config:
+                  - module: kubernetes
+                    period: 10s
+                    hosts: ["${KUBE_STATE_METRICS_HOSTS}"]
+                    add_metadata: true
+                    metricsets:
+                      - state_node
+                      - state_deployment
+                      - state_daemonset
+                      - state_replicaset
+                      - state_pod
+                      - state_container
+                      - state_job
+                      - state_cronjob
+                      - state_resourcequota
+                      - state_statefulset
+                      - state_service
       metricbeat.modules:
       - module: kubernetes
         metricsets:
@@ -93,7 +120,7 @@ daemonset:
       memory: "100Mi"
     limits:
       cpu: "1000m"
-      memory: "200Mi"
+      memory: "400Mi"
   tolerations: []
 
 deployment:
@@ -103,7 +130,7 @@ deployment:
   labels: {}
   affinity: {}
   # Include the deployment
-  enabled: true
+  enabled: false
   # Extra environment variables for Metricbeat container.
   envFrom: []
   # - configMapRef:
@@ -173,8 +200,9 @@ deployment:
       memory: "100Mi"
     limits:
       cpu: "1000m"
-      memory: "200Mi"
+      memory: "500Mi"
   tolerations: []
+
 
 # Replicas being used for the kube-state-metrics metricbeat deployment
 replicas: 1
