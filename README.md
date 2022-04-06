@@ -49,7 +49,7 @@ The correct command can be obtained from Kubernetes Engine in GCP.
 ### Put load on the cluster
 1. `cd scripts`
 2. `go build`
-3. `./stress_test_k8s --kubeconfig=/Users/michaliskatsoulis/.kube/config --deployments=20 --namespaces=10 --podlabels=4 --podannotations=4`
+3. `./stress_test_k8s --kubeconfig=/Users/<username>/.kube/config --deployments=20 --namespaces=10 --podlabels=4 --podannotations=4`
 
 The above command will create 10 namespaces and deploy one demo nginx deployment in each one with
 as many 20 replicas as indicated in the `deployments` flag. Each pod will have 4 labels and 4 annotations,
