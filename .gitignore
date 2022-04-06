@@ -1,4 +1,5 @@
 */stress_test_k8s
 */.terraform
 */.terraform.lock.hcl
-
+*/infra/terraform.tfstate
+*/infra/terraform.tfstate.backup
