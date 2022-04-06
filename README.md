@@ -25,6 +25,7 @@ In case the cluster is not running or an update is needed.
    deployBeat =  true
    deployAgent = true
    imageTag = "8.2.0-SNAPSHOT"
+   namespace = "kube-system"
 ```
 4. `terraform apply`
 
