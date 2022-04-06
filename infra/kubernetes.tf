@@ -33,7 +33,7 @@ provider "kubernetes" {
 
 resource "kubernetes_secret" "elasticsearch-master-credentials" {
   metadata {
-    name = "elasticsearch-credentials"
+    name      = "elasticsearch-credentials"
     namespace = var.namespace
   }
 
@@ -46,7 +46,7 @@ resource "kubernetes_secret" "elasticsearch-master-credentials" {
 
 resource "kubernetes_secret" "elasticsearch-master-url" {
   metadata {
-    name = "elasticsearch-host"
+    name      = "elasticsearch-host"
     namespace = var.namespace
   }
 

@@ -22,7 +22,7 @@ variable "gke_max_num_nodes" {
 resource "google_container_cluster" "primary" {
   name     = "${var.team_name}-gke"
   location = "${var.region}-c"
-  
+
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
@@ -60,8 +60,8 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 
   autoscaling {
-    min_node_count  = var.gke_num_nodes
-    max_node_count  = var.gke_max_num_nodes
+    min_node_count = var.gke_num_nodes
+    max_node_count = var.gke_max_num_nodes
   }
 }
 
