@@ -661,7 +661,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 kube_state_metrics:
-  enabled: false
+  enabled: true
   # host is used only when kube_state_metrics.enabled: false
   host: "metricbeat-kube-state-metrics:8080"
 

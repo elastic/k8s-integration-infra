@@ -63,7 +63,7 @@ resource "helm_release" "elastic-agent" {
   name        = "elastic-agent"
   chart       = "elastic-agent"
   repository  = "./charts"
-  namespace   = "default"
+  namespace   = var.namespace
   max_history = 3
   create_namespace = true
   wait             = true

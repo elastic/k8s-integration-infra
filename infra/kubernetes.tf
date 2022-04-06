@@ -16,6 +16,12 @@ variable "es_host" {
   description = "The url:port of elasticsearch."
 }
 
+variable "namespace" {
+  default     = "default"
+  type        = string
+  description = "The namespace to deploy beats and agent"
+}
+
 data "google_client_config" "default" {}
 
 provider "kubernetes" {
@@ -28,6 +34,7 @@ provider "kubernetes" {
 resource "kubernetes_secret" "elasticsearch-master-credentials" {
   metadata {
     name = "elasticsearch-credentials"
+    namespace = var.namespace
   }
 
   data = {
@@ -40,6 +47,7 @@ resource "kubernetes_secret" "elasticsearch-master-credentials" {
 resource "kubernetes_secret" "elasticsearch-master-url" {
   metadata {
     name = "elasticsearch-host"
+    namespace = var.namespace
   }
 
   data = {
