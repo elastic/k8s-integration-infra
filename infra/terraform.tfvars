@@ -1,12 +1,12 @@
 project_id        = "elastic-observability"
 region            = "us-central1"
-team_name         = "cloud-native-team"
-gke_num_nodes     = 2
+cluster_name      = ""
+gke_num_nodes     = 1
 gke_max_num_nodes = 2
 es_password       = ""
 es_user           = "elastic"
 es_host           = ""
-deployBeat        = true
+deployBeat        = false
 deployAgent       = true
-imageTag          = "8.1.2"
+imageTag          = "8.2.0-SNAPSHOT"
 namespace         = "kube-system"
