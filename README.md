@@ -10,14 +10,27 @@ The purpose of this repo is to:
 3. terraform
 4. helm > 2.4.1
 5. golang
+6. elasticsearch cluster reachable by gcp(e.g. deployed in elastic cloud)
 
 ### Bring up the cluster
 In case the cluster is not running or an update is needed.
 1. `cd infra`
 2. `terraform init`
-3. Update the `terraform.tfvars` file with the correct values for 
+3. Update the `terraform.tfvars` file.
+    * Fill in the correct elasticsearh url and credentials:
+   ```
+   es_host, es_user, es_password
+   ```
+    * Set the cluster name and the region:
+   ```
+   region, cluster_name
+   ```
+   
 ```
-   gke_num_nodes = 2
+   project_id= "elastic-observability"
+   region= "us-central1"
+   cluster_name= ""
+   gke_num_nodes = 1
    gke_max_num_nodes = 10
    es_password = ""
    es_user = "elastic"
@@ -30,8 +43,8 @@ In case the cluster is not running or an update is needed.
 4. `terraform apply`
 
 
-The above command will bring up a gke cluster initially with `gke_num_nodes` number of nodes with
-autoscaling up to `gke_max_num_nodes`.
+The above command will bring up a regional gke cluster initially with `gke_num_nodes` * (number of zones in region) number of nodes with
+autoscaling up to `gke_max_num_nodes` * (number of zones in region).
 In case `deployBeat = true` it will also bring up metricbeat and filebeat using helm as well as some secrets with the es
 credentials and host url.
 If `deployAgent = true`, elastic-agent will also be deployed in the cluster. If set to false,
