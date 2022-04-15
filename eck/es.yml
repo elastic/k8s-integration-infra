@@ -1,0 +1,74 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: ha
+spec:
+  version: 8.3.0-SNAPSHOT
+  nodeSets:
+  - name: zone-b
+    count: 1
+    config:
+      node.attr.zone: europe-west1-b
+      cluster.routing.allocation.awareness.attributes: zone
+    podTemplate:
+      spec:
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: failure-domain.beta.kubernetes.io/zone
+                  operator: In
+                  values:
+                  - europe-west1-b
+  - name: zone-c
+    count: 1
+    config:
+      node.attr.zone: europe-west1-c
+      cluster.routing.allocation.awareness.attributes: zone
+    podTemplate:
+      spec:
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: failure-domain.beta.kubernetes.io/zone
+                  operator: In
+                  values:
+                  - europe-west1-c
+  - name: zone-d
+    count: 1
+    config:
+      node.attr.zone: europe-west1-d
+      cluster.routing.allocation.awareness.attributes: zone
+    podTemplate:
+      spec:
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: failure-domain.beta.kubernetes.io/zone
+                  operator: In
+                  values:
+                  - europe-west1-d
+
