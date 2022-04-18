@@ -64,3 +64,10 @@ output.elasticsearch:
 ```
 
 
+## Setup Dashboards
+
+```bash
+./metricbeat setup --dashboards -E setup.dashboards.directory=./build/kibana \
+-E setup.kibana.host="https://elastic:18HBnV5231khC6No5p48rdbt@104.199.52.165:5601" \
+-E setup.kibana.ssl.verification_mode="none" -e -d "*"
+```
