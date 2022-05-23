@@ -139,13 +139,13 @@ func main() {
 	simpleIndex := ".ds-metricbeat-8.3.0-2022.05.23-000001"
 
 	execute(tsdbIndex, elasticQuery, cfgTSDB)
+	log.Printf("\n\n")
 	execute(simpleIndex, elasticQuery, cfgSimple)
 
 }
 
 func execute(indexName string, elasticQuery string, cfg elasticsearch.Config) {
 	log.Printf(strings.Repeat("*", 37))
-	log.Printf("\n")
 	log.Printf("Executing against new ES cluster")
 	log.Printf(strings.Repeat("*", 37))
 	var (
