@@ -7,7 +7,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"log"
@@ -25,10 +24,7 @@ func main() {
 		//wg sync.WaitGroup
 	)
 
-	// Initialize a client with the default settings.
-	//
-	// An `ELASTICSEARCH_URL` environment variable will be used when exported.
-	//
+	// Initialize a client
 	cfg := elasticsearch.Config{
 		Addresses: []string{
 			"https://35.195.16.23:9200",
@@ -40,10 +36,8 @@ func main() {
 			ResponseHeaderTimeout: time.Second,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
-				// ...
 			},
 		},
-		// ...
 	}
 	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {
@@ -82,10 +76,10 @@ func main() {
 	}
 	for _, index := range ind.([]interface{}) {
 		id := index.(map[string]interface{})
-		fmt.Println("index name: ", id["index"])
-		fmt.Println("index size: ", id["pri.store.size"])
-		fmt.Println("index docs: ", id["docs.count"])
-		log.Println(strings.Repeat("~", 37))
+		log.Printf("index name: %v", id["index"])
+		log.Printf("index size: %v", id["pri.store.size"])
+		log.Printf("index docs: %v", id["docs.count"])
+		log.Printf(strings.Repeat("~", 37))
 	}
 	// 3. Search for the indexed documents
 	//
@@ -188,11 +182,11 @@ func main() {
 
 	// Default query is "{}" if JSON is invalid
 	if isValid == false {
-		fmt.Println("ERROR: query string not valid:", elasticQuery)
-		fmt.Println("Using default match_all query")
+		log.Fatalf("ERROR: query string not valid: %v", elasticQuery)
+		log.Fatalf("Using default match_all query")
 		elasticQuery = "{}"
 	} else {
-		fmt.Println("valid JSON:", isValid)
+		log.Println("valid JSON:", isValid)
 	}
 
 	// Build a new string from JSON query
