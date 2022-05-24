@@ -134,9 +134,9 @@ func main() {
 			},
 		},
 	}
-
-	tsdbIndex := ".ds-metricbeat-tsdb-8.3.0-2022.05.23-000001"
-	simpleIndex := ".ds-metricbeat-8.3.0-2022.05.23-000001"
+	
+	tsdbIndex := ".ds-metricbeat-tsdb-8.3.0-2022.05.24-000001"
+	simpleIndex := ".ds-metricbeat-8.3.0-2022.05.24-000001"
 
 	execute(tsdbIndex, elasticQuery, cfgTSDB)
 	log.Printf("\n\n")
@@ -211,8 +211,6 @@ func execute(indexName string, elasticQuery string, cfg elasticsearch.Config) {
 		log.Fatalf("ERROR: query string not valid: %v", elasticQuery)
 		log.Fatalf("Using default match_all query")
 		elasticQuery = "{}"
-	} else {
-		log.Println("valid JSON:", isValid)
 	}
 
 	// Build a new string from JSON query
