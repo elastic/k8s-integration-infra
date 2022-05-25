@@ -45,7 +45,7 @@ This will create Kubernetes nodes across multiple zones in the region selected.
 
 `kubectl get svc ha-es-http`
 
-`PASSWORD=$(kubectl get secret ha-es-elastic-user -o go-template='{{.data.elastic | base64decode}}') `
+`PASSWORD=$(kubectl get secret ha-es-elastic-user -o go-template='{{.data.elastic | base64decode}}')`
 and `curl` using the EXTERNAL_IP ie:
 `curl -k -u "elastic:$PASSWORD" https://34.76.163.44:9200/_cat/indices?v=true&s=index`
 
