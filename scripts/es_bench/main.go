@@ -11,6 +11,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -107,10 +108,10 @@ func main() {
 	// Initialize a client
 	cfgTSDB := elasticsearch.Config{
 		Addresses: []string{
-			"https://35.195.16.23:9200",
+			os.Getenv("TSDB_ES_URL"),
 		},
 		Username: "elastic",
-		Password: "1TVP5SAGs207s3490TY2Nymo",
+		Password: os.Getenv("TSDB_ES_PASS"),
 		Transport: &http.Transport{
 			MaxIdleConnsPerHost:   10,
 			ResponseHeaderTimeout: time.Second,
@@ -122,10 +123,10 @@ func main() {
 
 	cfgSimple := elasticsearch.Config{
 		Addresses: []string{
-			"https://104.199.81.103:9200",
+			os.Getenv("SIMPLE_ES_URL"),
 		},
 		Username: "elastic",
-		Password: "fgx1L9A1EQ7F3sG224S21ErB",
+		Password: os.Getenv("SIMPLE_ES_PASS"),
 		Transport: &http.Transport{
 			MaxIdleConnsPerHost:   10,
 			ResponseHeaderTimeout: time.Second,
@@ -134,9 +135,9 @@ func main() {
 			},
 		},
 	}
-	
-	tsdbIndex := ".ds-metricbeat-tsdb-8.3.0-2022.05.24-000001"
-	simpleIndex := ".ds-metricbeat-8.3.0-2022.05.24-000001"
+
+	tsdbIndex := os.Getenv("TSDB_INDEX")
+	simpleIndex := os.Getenv("SIMPLE_INDEX")
 
 	execute(tsdbIndex, elasticQuery, cfgTSDB)
 	log.Printf("\n\n")
@@ -151,7 +152,6 @@ func execute(indexName string, elasticQuery string, cfg elasticsearch.Config) {
 	var (
 		r  map[string]interface{}
 		ind interface{}
-		//wg sync.WaitGroup
 	)
 
 	// Initialize a client
@@ -256,14 +256,7 @@ func execute(indexName string, elasticQuery string, cfg elasticsearch.Config) {
 		if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
 			log.Fatalf("Error parsing the response body: %s", err)
 		}
-		// Print the response status, number of results, and request duration.
-		//log.Printf(
-		//	"[%s] %d hits; took: %dms",
-		//	res.Status(),
-		//	int(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64)),
-		//	int(r["took"].(float64)),
-		//)
 		medianTime = medianTime + int(r["took"].(float64))
 	}
-	log.Printf("median time is: %dms", medianTime/20)
+	log.Printf("median query time is: %dms", medianTime/20)
 }
