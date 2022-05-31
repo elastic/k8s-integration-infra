@@ -1,23 +1,3 @@
-variable "gke_username" {
-  default     = ""
-  description = "gke username"
-}
-
-variable "gke_password" {
-  default     = ""
-  description = "gke password"
-}
-
-variable "gke_num_nodes" {
-  default     = 2
-  description = "number of gke nodes"
-}
-
-variable "gke_max_num_nodes" {
-  default     = 10
-  description = "max number of gke nodes"
-}
-
 # GKE cluster
 resource "google_container_cluster" "primary" {
   name     = var.cluster_name
@@ -52,7 +32,7 @@ resource "google_container_node_pool" "primary_nodes" {
     }
 
     # preemptible  = true
-    machine_type = "e2-highcpu-4"
+    machine_type = var.machine_type
     tags         = ["gke-node", var.cluster_name]
     metadata = {
       disable-legacy-endpoints = "true"

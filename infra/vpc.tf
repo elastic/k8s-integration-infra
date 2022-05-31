@@ -1,15 +1,3 @@
-variable "project_id" {
-  description = "project id"
-}
-
-variable "region" {
-  description = "region"
-}
-
-variable "cluster_name" {
-  description = "cluster name"
-}
-
 provider "google" {
   project = var.project_id
   region  = var.region

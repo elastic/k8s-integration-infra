@@ -56,6 +56,7 @@ daemonset:
         hosts: '${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}'
         username: '${ELASTICSEARCH_USERNAME}'
         password: '${ELASTICSEARCH_PASSWORD}'
+        ssl.verification_mode: "none"
   # Only used when updateStrategy is set to "RollingUpdate"
   maxUnavailable: 1
   nodeSelector: {}

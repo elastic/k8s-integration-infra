@@ -3,7 +3,7 @@ kind: Elasticsearch
 metadata:
   name: ha
 spec:
-  version: 8.3.0-SNAPSHOT
+  version: ${imageTag}
   http:
     service:
       spec:
@@ -13,7 +13,7 @@ spec:
     count: 1
     config:
       node.roles: ["master"]
-      node.attr.zone: europe-west1-b
+      node.attr.zone: ${region}-b
       cluster.routing.allocation.awareness.attributes: zone
     podTemplate:
       spec:
@@ -31,7 +31,7 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                  - europe-west1-b
+                  - ${region}-b
   - name: zone-b-data
     count: 2
     volumeClaimTemplates:
@@ -46,7 +46,7 @@ spec:
           storageClassName: zone-storage
     config:
       node.roles: ["data"]
-      node.attr.zone: europe-west1-b
+      node.attr.zone: ${region}-b
       cluster.routing.allocation.awareness.attributes: zone
     podTemplate:
       spec:
@@ -64,12 +64,12 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                  - europe-west1-b
+                  - ${region}-b
   - name: zone-c
     count: 1
     config:
       node.roles: ["master"]
-      node.attr.zone: europe-west1-c
+      node.attr.zone: ${region}-c
       cluster.routing.allocation.awareness.attributes: zone
     podTemplate:
       spec:
@@ -87,7 +87,7 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                  - europe-west1-c
+                  - ${region}-c
   - name: zone-c-data
     count: 2
     volumeClaimTemplates:
@@ -102,7 +102,7 @@ spec:
           storageClassName: zone-storage
     config:
       node.roles: ["data"]
-      node.attr.zone: europe-west1-c
+      node.attr.zone: ${region}-c
       cluster.routing.allocation.awareness.attributes: zone
     podTemplate:
       spec:
@@ -120,12 +120,12 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                  - europe-west1-c
+                  - ${region}-c
   - name: zone-d
     count: 1
     config:
       node.roles: ["master"]
-      node.attr.zone: europe-west1-d
+      node.attr.zone: ${region}-d
       cluster.routing.allocation.awareness.attributes: zone
     podTemplate:
       spec:
@@ -143,7 +143,7 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                  - europe-west1-d
+                  - ${region}-d
   - name: zone-d-data
     count: 2
     volumeClaimTemplates:
@@ -158,7 +158,7 @@ spec:
           storageClassName: zone-storage
     config:
       node.roles: ["data"]
-      node.attr.zone: europe-west1-d
+      node.attr.zone: ${region}-d
       cluster.routing.allocation.awareness.attributes: zone
     podTemplate:
       spec:
@@ -176,4 +176,4 @@ spec:
                 - key: failure-domain.beta.kubernetes.io/zone
                   operator: In
                   values:
-                  - europe-west1-d
+                  - ${region}-d

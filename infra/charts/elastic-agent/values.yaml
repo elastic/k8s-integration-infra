@@ -54,6 +54,7 @@ daemonset:
               ${ES_HOST}
           username: ${ES_USERNAME}
           password: ${ES_PASSWORD}
+          ssl.verification_mode: "none"
       agent:
         monitoring:
           enabled: true
