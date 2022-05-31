@@ -100,6 +100,9 @@ daemonset:
         hosts: '${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}'
         username: '${ELASTICSEARCH_USERNAME}'
         password: '${ELASTICSEARCH_PASSWORD}'
+        ssl.verification_mode: "none"
+
+
   nodeSelector: {}
   # A list of secrets and their paths to mount inside the pod
   # This is useful for mounting certificates for security other sensitive values
@@ -271,11 +274,21 @@ clusterRoleRules:
       - statefulsets
       - deployments
       - replicasets
+      - daemonsets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+      - cronjobs
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources:
       - nodes/stats
     verbs: ["get"]
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
 
 podAnnotations: {}
 # iam.amazonaws.com/role: es-cluster
