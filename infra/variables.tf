@@ -82,3 +82,8 @@ variable "region" {
 variable "cluster_name" {
   description = "cluster name"
 }
+
+variable "node_version" {
+  type        = string
+  description = "GKE version of kubernetes"
+}
