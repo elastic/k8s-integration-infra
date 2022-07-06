@@ -7,25 +7,6 @@ provider "helm" {
   }
 }
 
-variable "deployAgent" {
-  type        = bool
-  default     = false
-  description = "deploy elastic-agent"
-}
-
-variable "deployBeat" {
-  type        = bool
-  default     = true
-  description = "deploy metricbeat and filebeat"
-}
-
-variable "imageTag" {
-  type        = string
-  default     = "8.2.0-SNAPSHOT"
-  description = "The beats and agent image version"
-}
-
-
 resource "helm_release" "metricbeat" {
   count            = var.deployBeat ? 1 : 0
   name             = "metricbeat"
@@ -40,6 +21,7 @@ resource "helm_release" "metricbeat" {
     name  = "imageTag"
     value = var.imageTag
   }
+  depends_on = [kubernetes_secret.elasticsearch-master-credentials]
 }
 
 resource "helm_release" "filebeat" {
@@ -56,6 +38,7 @@ resource "helm_release" "filebeat" {
     name  = "imageTag"
     value = var.imageTag
   }
+  depends_on = [kubernetes_secret.elasticsearch-master-credentials]
 }
 
 resource "helm_release" "elastic-agent" {
@@ -72,4 +55,5 @@ resource "helm_release" "elastic-agent" {
     name  = "imageTag"
     value = var.imageTag
   }
+  depends_on = [kubernetes_secret.elasticsearch-master-credentials]
 }

@@ -1,23 +1,3 @@
-variable "gke_username" {
-  default     = ""
-  description = "gke username"
-}
-
-variable "gke_password" {
-  default     = ""
-  description = "gke password"
-}
-
-variable "gke_num_nodes" {
-  default     = 2
-  description = "number of gke nodes"
-}
-
-variable "gke_max_num_nodes" {
-  default     = 10
-  description = "max number of gke nodes"
-}
-
 # GKE cluster
 resource "google_container_cluster" "primary" {
   name     = var.cluster_name
@@ -26,9 +6,10 @@ resource "google_container_cluster" "primary" {
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
-  remove_default_node_pool = true
+  //remove_default_node_pool = true
   initial_node_count       = 1
-
+  node_version       = var.node_version
+  min_master_version = var.node_version
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
   ip_allocation_policy {}
@@ -52,7 +33,7 @@ resource "google_container_node_pool" "primary_nodes" {
     }
 
     # preemptible  = true
-    machine_type = "e2-highcpu-4"
+    machine_type = var.machine_type
     tags         = ["gke-node", var.cluster_name]
     metadata = {
       disable-legacy-endpoints = "true"

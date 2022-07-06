@@ -1,5 +1,7 @@
 # High availability Elasticsearch on Kubernetes with ECK and GKE
 
+**Deprecated instructions**. Follow k8s-integration-infra/README.md for bringing up elasticsearch cluster.
+
 ## Create GKE cluster
 
 Creating a Kubernetes cluster using GKE is very straightforward. Navigate to the Kubernetes Engine page
@@ -17,7 +19,8 @@ This will create Kubernetes nodes across multiple zones in the region selected.
 `kubectl apply -f https://download.elastic.co/downloads/eck/2.1.0/operator.yaml`
 
 
-## Exposing the service
+## Creating the Storageclass
+
 
 `kubectl create -f storage_class.yml`
 
