@@ -1,0 +1,5 @@
+---
+- job:
+    name: "cloudnative"
+    description: "Observability cloudnative"
+    project-type: folder
