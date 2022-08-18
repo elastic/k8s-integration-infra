@@ -7,13 +7,11 @@ pipeline {
   environment {
     REPO = "k8s-integration-infra"
     BASE_DIR = "src/github.com/elastic/${env.REPO}"
+    JOB_GIT_CREDENTIALS = "f6c7695a-671e-4f4f-a331-acdce44ff9ba"
     PIPELINE_LOG_LEVEL = 'INFO'
-    SNAPSHOT = true
-    DOCKER_REGISTRY = 'docker.elastic.co'
-    DEVELOPER_MODE=true
   }
   options {
-    timeout(time: 2, unit: 'HOURS')
+    timeout(time: 1, unit: 'HOURS')
     buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '20', daysToKeepStr: '30'))
     timestamps()
     ansiColor('xterm')
@@ -23,92 +21,48 @@ pipeline {
     quietPeriod(10)
   }
   triggers {
-    issueCommentTrigger("(${obltGitHubComments()}|^run (integration|end-to-end) tests|/package)")
-  }
-  parameters {
-    // disabled by default, but required for merge, there are two GH checks:
-    // opt-in with 'ci:integration'
-    booleanParam(name: 'integration_tests_ci', defaultValue: false, description: 'Enable Integration tests')
-
-    // disabled by default, but required for merge:
-    // opt-in with 'ci:end-to-end' tag on PR
-    booleanParam(name: 'end_to_end_tests_ci', defaultValue: false, description: 'Enable End-to-End tests')
+    issueCommentTrigger("${obltGitHubComments()}")
   }
   stages {
     stage('Checkout') {
       steps {
-        pipelineManager([ cancelPreviousRunningBuilds: [ when: 'PR' ] ])
         deleteDir()
         gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: true)
-        dir("${BASE_DIR}"){
-          setEnvVar('ONLY_DOCS', isGitRegionMatch(patterns: [ '.*\\.(asciidoc|md)' ], shouldMatchAll: true).toString())
-          setEnvVar('PACKAGING_CHANGES', isGitRegionMatch(patterns: [ '(^dev-tools/packaging/.*|.ci/Jenkinsfile)' ], shouldMatchAll: false).toString())
-          setEnvVar('K8S_CHANGES', isGitRegionMatch(patterns: [ '(^deploy/kubernetes/.*|^version/docs/version.asciidoc|.ci/Jenkinsfile)' ], shouldMatchAll: false).toString())
+        pipelineManager([ cancelPreviousRunningBuilds: [ when: 'PR' ] ])
+        stash allowEmpty: true, name: 'source', useDefaultExcludes: false
+      }
+    }
+    stage('Lint'){
+      steps {
+        withGithubNotify(context: "Lint") {
+          dir("${BASE_DIR}"){
+            echo 'command for linting'
+          }
+        }
+      }
+    }
+    stage('Build'){
+      steps {
+        withGithubNotify(context: "Build") {
+          dir("${BASE_DIR}"){
+            echo 'command for building'
+          }
+        }
+      }
+    }
+    stage('Test'){
+      steps {
+        withGithubNotify(context: "Test") {
+          dir("${BASE_DIR}"){
+            echo 'command for testing'
+          }
         }
       }
     }
   }
   post {
     cleanup {
-      notifyBuildResult(prComment: true,
-                        analyzeFlakey: !isTag(), jobName: getFlakyJobName(withBranch: (isPR() ? env.CHANGE_TARGET : env.BRANCH_NAME)),
-                        githubIssue: isBranch() && currentBuild.currentResult != "SUCCESS",
-                        githubLabels: 'Team:Cloud Native Automation')
+      notifyBuildResult(prComment: true)
     }
   }
-}
-
-// As agreed let's report the code coverage for Linux but no ARM only.
-def isCodeCoverageEnabled() {
-  return (isUnix() && !isArm())
-}
-
-def withPackageEnv(platform, Closure body) {
-  if (isUnix()) {
-    if (isDarwin()) {
-      withPackageDarwinEnv() {
-        body()
-      }
-    } else {
-      if (isArm()) {
-        withPackageArmEnv() {
-          body()
-        }
-      } else {
-        withPackageLinuxEnv() {
-          body()
-        }
-      }
-    }
-  } else {
-    error 'withPackageEnv: unsupported platform'
-  }
-}
-
-
-
-def runK8s(Map args=[:]) {
-  withGithubNotify(context: args.context) {
-    withMageEnv(){
-      withKindEnv(args) {
-        dir("${BASE_DIR}"){
-          sh(label: "Deploy to kubernetes",script: "make -C deploy/kubernetes test")
-        }
-      }
-    }
-  }
-}
-
-/**
-* Wrapper to know if the build should enalbe the e2e stage
-*/
-def isE2eEnabled() {
-  return params.end_to_end_tests_ci || env.GITHUB_COMMENT?.contains('e2e tests') || matchesPrLabel(label: 'ci:end-to-end')
-}
-
-/**
-* Wrapper to know if the build should enalbe the package stage
-*/
-def isPackageEnabled() {
-  return env.PACKAGING_CHANGES == "true" || env.GITHUB_COMMENT?.contains('package') || matchesPrLabel(label: 'ci:package')
 }
