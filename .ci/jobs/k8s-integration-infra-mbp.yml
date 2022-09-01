@@ -1,8 +1,8 @@
 ---
 - job:
     name: "cloudnative/k8s-integration-infra-mbp"
-    display-name: k8s-integration-infra
-    description: k8s-integration-infra
+    display-name: cloudnative-automation
+    description: "cloudnative-automation"
     project-type: multibranch
     script-path: .ci/Jenkinsfile
     scm:
@@ -12,6 +12,7 @@
           discover-pr-forks-trust: permission
           discover-pr-origin: merge-current
           discover-tags: true
+					head-filter-regex: '(main|PR-.*|v\d+\.\d+\.\d+)'
           notification-context: 'fleet-ci'
           repo: k8s-integration-infra
           repo-owner: elastic
@@ -39,4 +40,4 @@
             timeout: 100
           timeout: '15'
           use-author: true
-          wipe-workspace: 'True'
+          wipe-workspace: true
