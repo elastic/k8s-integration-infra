@@ -1,6 +1,6 @@
 ---
 - job:
-    name: "k8s-integration-infra-mbp"
+    name: "cloudnative/k8s-integration-infra-mbp"
     display-name: k8s-integration-infra
     description: k8s-integration-infra
     project-type: multibranch
