@@ -56,10 +56,16 @@ pipeline {
       }
     }
     stage('Test'){
+      when {
+        allOf {
+                branch 'main'
+                expression { return params.rally_tests_ci }
+              }
+      }
       steps {
         withGithubNotify(context: "Test") {
           dir("${BASE_DIR}"){
-            echo 'command for testing'
+            echo 'Run Rally'
           }
         }
       }
