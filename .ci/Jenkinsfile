@@ -25,6 +25,7 @@ pipeline {
   }
   parameters {
     // disabled by default, but required to start Rally tests:
+    // opt-in with 'ci:integration'
     booleanParam(name: 'rally_tests_ci', defaultValue: false, description: 'Enable Rally tests')
   }
   stages {
@@ -55,14 +56,6 @@ pipeline {
       }
     }
     stage('Test'){
-      when {
-              beforeAgent true
-              // Always when running builds on branches/tags
-              allOf {
-                branch 'main'         // Only runs for branch main
-                expression { return rally_tests_ci }
-              }
-      }
       steps {
         withGithubNotify(context: "Test") {
           dir("${BASE_DIR}"){
@@ -70,6 +63,7 @@ pipeline {
           }
         }
       }
+    }
   }
   post {
     cleanup {
