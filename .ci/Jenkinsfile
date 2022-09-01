@@ -23,6 +23,11 @@ pipeline {
   triggers {
     issueCommentTrigger("${obltGitHubComments()}")
   }
+  parameters {
+    // disabled by default, but required to start Rally tests:
+    // opt-in with 'ci:integration'
+    booleanParam(name: 'rally_tests_ci', defaultValue: false, description: 'Enable Rally tests')
+  }
   stages {
     stage('Checkout') {
       steps {
@@ -51,10 +56,16 @@ pipeline {
       }
     }
     stage('Test'){
+      when {
+        allOf {
+                branch 'main'
+                expression { return params.rally_tests_ci }
+              }
+      }
       steps {
         withGithubNotify(context: "Test") {
           dir("${BASE_DIR}"){
-            echo 'command for testing'
+            echo 'Run Rally'
           }
         }
       }
