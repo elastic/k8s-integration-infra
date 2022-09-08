@@ -26,7 +26,7 @@ pipeline {
   }
   post {
     cleanup {
-      notifyBuildResult(prComment: false)
+      notifyBuildResult(slackComment: true, slackChannel: '#cloudnative-sdh-alarm')
     }
   }
 }

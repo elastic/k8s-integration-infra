@@ -67,6 +67,10 @@ pipeline {
           dir("${BASE_DIR}"){
             echo 'Run Rally'
           }
+          junit(allowEmptyResults: true,
+            keepLongStdio: true,
+            testResults: "TEST-*.xml"
+          )
         }
       }
     }
