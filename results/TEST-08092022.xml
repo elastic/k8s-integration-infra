@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<project name="JsUnit" default="standalone_test" basedir=".">
+    <property
+            name="browserFileNames"
+            value=""
+            description="browserFileNames is a comma-separated list of browsers in which to run tests when StandaloneTest is invoked on this host. Each value can be a semi-colon separated list, with the second value being the program to run to shut down the browser and the third value being the display name of the browser. The second and third values are optional. For a JsUnit Server, this is a mandatory property. For example: 'c:\program files\internet explorer\iexplore.exe;c:\program files\killie.bat;Internet Explorer 6.0,c:\program files\netscape\netscape7.1\netscp.exe,c:\program files\Opera\runopera.bat'"
+            />
+</project>
