@@ -1,0 +1,841 @@
+{
+    "mappings": {
+        "_data_stream_timestamp": {
+            "enabled": true
+        },
+        "date_detection": false,
+        "_source": {
+            "enabled": {{ source_enabled | default(false) | tojson }}{% if synthetic_source | default(False) | string | lower == "true" %},
+            "synthetic": true
+            {% endif %}
+        },
+        "dynamic_templates": [
+            {
+                "match_ip": {
+                    "mapping": {
+                        "type": "ip"
+                    },
+                    "match": "ip",
+                    "match_mapping_type": "string"
+                }
+            },
+            {
+                "match_message": {
+                    "mapping": {
+                        "type": "match_only_text"
+                    },
+                    "match": "message",
+                    "match_mapping_type": "string"
+                }
+            },
+            {
+                "strings_as_keyword": {
+                    "mapping": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "match_mapping_type": "string"
+                }
+            }
+        ],
+        "properties": {
+            "@timestamp": {
+                "type": "date"
+            },
+            "agent": {
+                "properties": {
+                    "ephemeral_id": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "id": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "name": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "type": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "version": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            "beat": {
+                "properties": {
+                    "elasticsearch": {
+                        "properties": {
+                            "cluster": {
+                                "properties": {
+                                    "id": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "id": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "state": {
+                        "properties": {
+                            "beat": {
+                                "properties": {
+                                    "host": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "name": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "type": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "uuid": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "version": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    }
+                                }
+                            },
+                            "cluster": {
+                                "properties": {
+                                    "uuid": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    }
+                                }
+                            },
+                            "host": {
+                                "properties": {
+                                    "containerized": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "os": {
+                                        "properties": {
+                                            "kernel": {
+                                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                                "type": "keyword"
+                                            },
+                                            "name": {
+                                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                                "type": "keyword"
+                                            },
+                                            "platform": {
+                                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                                "type": "keyword"
+                                            },
+                                            "version": {
+                                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                                "type": "keyword"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "management": {
+                                "properties": {
+                                    "enabled": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            },
+                            "module": {
+                                "properties": {
+                                    "count": {
+                                        "type": "long"
+                                    }
+                                }
+                            },
+                            "output": {
+                                "properties": {
+                                    "name": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    }
+                                }
+                            },
+                            "queue": {
+                                "properties": {
+                                    "name": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    }
+                                }
+                            },
+                            "service": {
+                                "properties": {
+                                    "id": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "name": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "version": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "stats": {
+                        "properties": {
+                            "beat": {
+                                "properties": {
+                                    "host": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "name": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "type": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "uuid": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "version": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    }
+                                }
+                            },
+                            "cgroup": {
+                                "properties": {
+                                    "cpu": {
+                                        "properties": {
+                                            "cfs": {
+                                                "properties": {
+                                                    "period": {
+                                                        "properties": {
+                                                            "us": {
+                                                                "type": "long"
+                                                            }
+                                                        }
+                                                    },
+                                                    "quota": {
+                                                        "properties": {
+                                                            "us": {
+                                                                "type": "long"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "id": {
+                                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                                "type": "keyword"
+                                            },
+                                            "stats": {
+                                                "properties": {
+                                                    "periods": {
+                                                        "type": "long"
+                                                    },
+                                                    "throttled": {
+                                                        "properties": {
+                                                            "ns": {
+                                                                "type": "float"
+                                                            },
+                                                            "periods": {
+                                                                "type": "long"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "cpuacct": {
+                                        "properties": {
+                                            "id": {
+                                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                                "type": "keyword"
+                                            },
+                                            "total": {
+                                                "properties": {
+                                                    "ns": {
+                                                        "type": "float"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "memory": {
+                                        "properties": {
+                                            "id": {
+                                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                                "type": "keyword"
+                                            },
+                                            "mem": {
+                                                "properties": {
+                                                    "limit": {
+                                                        "properties": {
+                                                            "bytes": {
+                                                                "type": "float"
+                                                            }
+                                                        }
+                                                    },
+                                                    "usage": {
+                                                        "properties": {
+                                                            "bytes": {
+                                                                "type": "float"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "cpu": {
+                                "properties": {
+                                    "system": {
+                                        "properties": {
+                                            "ticks": {
+                                                "type": "long"
+                                            },
+                                            "time": {
+                                                "properties": {
+                                                    "ms": {
+                                                        "type": "long"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "total": {
+                                        "properties": {
+                                            "ticks": {
+                                                "type": "long"
+                                            },
+                                            "time": {
+                                                "properties": {
+                                                    "ms": {
+                                                        "type": "long"
+                                                    }
+                                                }
+                                            },
+                                            "value": {
+                                                "type": "long"
+                                            }
+                                        }
+                                    },
+                                    "user": {
+                                        "properties": {
+                                            "ticks": {
+                                                "type": "long"
+                                            },
+                                            "time": {
+                                                "properties": {
+                                                    "ms": {
+                                                        "type": "long"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "info": {
+                                "properties": {
+                                    "ephemeral_id": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "name": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    },
+                                    "uptime": {
+                                        "properties": {
+                                            "ms": {
+                                                "type": "long"
+                                            }
+                                        }
+                                    },
+                                    "version": {
+                                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                        "type": "keyword"
+                                    }
+                                }
+                            },
+                            "libbeat": {
+                                "properties": {
+                                    "config": {
+                                        "properties": {
+                                            "reloads": {
+                                                "type": "long"
+                                            },
+                                            "running": {
+                                                "type": "long"
+                                            },
+                                            "starts": {
+                                                "type": "long"
+                                            },
+                                            "stops": {
+                                                "type": "long"
+                                            }
+                                        }
+                                    },
+                                    "output": {
+                                        "properties": {
+                                            "events": {
+                                                "properties": {
+                                                    "acked": {
+                                                        "type": "long"
+                                                    },
+                                                    "active": {
+                                                        "type": "long"
+                                                    },
+                                                    "batches": {
+                                                        "type": "long"
+                                                    },
+                                                    "dropped": {
+                                                        "type": "long"
+                                                    },
+                                                    "duplicates": {
+                                                        "type": "long"
+                                                    },
+                                                    "failed": {
+                                                        "type": "long"
+                                                    },
+                                                    "toomany": {
+                                                        "type": "long"
+                                                    },
+                                                    "total": {
+                                                        "type": "long"
+                                                    }
+                                                }
+                                            },
+                                            "read": {
+                                                "properties": {
+                                                    "bytes": {
+                                                        "type": "long"
+                                                    },
+                                                    "errors": {
+                                                        "type": "long"
+                                                    }
+                                                }
+                                            },
+                                            "type": {
+                                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                                "type": "keyword"
+                                            },
+                                            "write": {
+                                                "properties": {
+                                                    "bytes": {
+                                                        "type": "long"
+                                                    },
+                                                    "errors": {
+                                                        "type": "long"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "pipeline": {
+                                        "properties": {
+                                            "clients": {
+                                                "type": "long"
+                                            },
+                                            "events": {
+                                                "properties": {
+                                                    "active": {
+                                                        "type": "long"
+                                                    },
+                                                    "dropped": {
+                                                        "type": "long"
+                                                    },
+                                                    "failed": {
+                                                        "type": "long"
+                                                    },
+                                                    "filtered": {
+                                                        "type": "long"
+                                                    },
+                                                    "published": {
+                                                        "type": "long"
+                                                    },
+                                                    "retry": {
+                                                        "type": "long"
+                                                    },
+                                                    "total": {
+                                                        "type": "long"
+                                                    }
+                                                }
+                                            },
+                                            "queue": {
+                                                "properties": {
+                                                    "acked": {
+                                                        "type": "long"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "memstats": {
+                                "properties": {
+                                    "gc_next": {
+                                        "type": "long"
+                                    },
+                                    "memory": {
+                                        "properties": {
+                                            "alloc": {
+                                                "type": "long"
+                                            },
+                                            "total": {
+                                                "type": "long"
+                                            }
+                                        }
+                                    },
+                                    "rss": {
+                                        "type": "long"
+                                    }
+                                }
+                            },
+                            "runtime": {
+                                "properties": {
+                                    "goroutines": {
+                                        "type": "long"
+                                    }
+                                }
+                            },
+                            "system": {
+                                "properties": {
+                                    "cpu": {
+                                        "properties": {
+                                            "cores": {
+                                                "type": "long"
+                                            }
+                                        }
+                                    },
+                                    "handles": {
+                                        "properties": {
+                                            "limit": {
+                                                "properties": {
+                                                    "hard": {
+                                                        "type": "float"
+                                                    },
+                                                    "soft": {
+                                                        "type": "float"
+                                                    }
+                                                }
+                                            },
+                                            "open": {
+                                                "type": "long"
+                                            }
+                                        }
+                                    },
+                                    "load": {
+                                        "properties": {
+                                            "1": {
+                                                "type": "float"
+                                            },
+                                            "15": {
+                                                "type": "float"
+                                            },
+                                            "5": {
+                                                "type": "float"
+                                            },
+                                            "norm": {
+                                                "properties": {
+                                                    "1": {
+                                                        "type": "float"
+                                                    },
+                                                    "15": {
+                                                        "type": "float"
+                                                    },
+                                                    "5": {
+                                                        "type": "float"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "uptime": {
+                                "properties": {
+                                    "ms": {
+                                        "type": "long"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "type": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            "cloud": {
+                "properties": {
+                    "account": {
+                        "properties": {
+                            "id": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "availability_zone": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "instance": {
+                        "properties": {
+                            "id": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "machine": {
+                        "properties": {
+                            "type": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "project": {
+                        "properties": {
+                            "id": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "provider": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "service": {
+                        "properties": {
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            },
+            {% if synthetic_source | string | lower == "false" %}
+            "data_stream": {
+                "properties": {
+                    "dataset": {
+                        "type": "constant_keyword",
+                        "value": "elastic_agent.filebeat"
+                    },
+                    "namespace": {
+                        "type": "constant_keyword",
+                        "value": "default"
+                    },
+                    "type": {
+                        "type": "constant_keyword",
+                        "value": "metrics"
+                    }
+                }
+            },
+            {% endif %}
+            "ecs": {
+                "properties": {
+                    "version": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            "elastic_agent": {
+                "properties": {
+                    "id": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "snapshot": {
+                        "type": "boolean"
+                    },
+                    "version": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            {% if synthetic_source | string | lower == "false" %}
+            "error": {
+                "properties": {
+                    "message": {
+                        "type": "match_only_text"
+                    }
+                }
+            },
+            {% endif %}
+            "event": {
+                "properties": {
+                    "dataset": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "duration": {
+                        "type": "long"
+                    },
+                    "module": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            "host": {
+                "properties": {
+                    "architecture": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "containerized": {
+                        "type": "boolean"
+                    },
+                    "hostname": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "ip": {
+                        "type": "ip"
+                    },
+                    "mac": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "name": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "os": {
+                        "properties": {
+                            "codename": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "family": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "kernel": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "platform": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "type": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "version": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            },
+            "metricset": {
+                "properties": {
+                    "name": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "period": {
+                        "type": "long"
+                    }
+                }
+            },
+            "orchestrator": {
+                "properties": {
+                    "cluster": {
+                        "properties": {
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "url": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            },
+            "service": {
+                "properties": {
+                    "address": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "name": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "type": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            }
+        }
+    },
+    "settings": {
+        "index": {
+            "codec": "best_compression",
+            "hidden": "true",
+            "lifecycle": {
+                "name": "metrics"
+            },
+            "number_of_replicas": "{{number_of_replicas | default(0)}}",
+            "number_of_shards": "{{number_of_shards | default(1)}}",
+            "query": {
+                "default_field": [
+                    "message"
+                ]
+            },
+            "routing": {
+                "allocation": {
+                    "include": {
+                        "_tier_preference": "data_hot"
+                    }
+                }
+            }
+        }
+    }
+}

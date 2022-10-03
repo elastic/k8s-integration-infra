@@ -1,0 +1,415 @@
+{
+    "mappings": {
+        "_data_stream_timestamp": {
+            "enabled": true
+        },
+        "date_detection": false,
+        "_source": {
+            "enabled": {{ source_enabled | default(false) | tojson }}{% if synthetic_source | default(False) | string | lower == "true" %},
+            "synthetic": true
+            {% endif %}
+        },
+        "dynamic_templates": [
+            {
+                "match_ip": {
+                    "mapping": {
+                        "type": "ip"
+                    },
+                    "match": "ip",
+                    "match_mapping_type": "string"
+                }
+            },
+            {
+                "match_message": {
+                    "mapping": {
+                        "type": "match_only_text"
+                    },
+                    "match": "message",
+                    "match_mapping_type": "string"
+                }
+            },
+            {
+                "strings_as_keyword": {
+                    "mapping": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "match_mapping_type": "string"
+                }
+            }
+        ],
+        "properties": {
+            "@timestamp": {
+                "type": "date"
+            },
+            "agent": {
+                "properties": {
+                    "ephemeral_id": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "id": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "name": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "type": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "version": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            "cloud": {
+                "properties": {
+                    "account": {
+                        "properties": {
+                            "id": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "availability_zone": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "instance": {
+                        "properties": {
+                            "id": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "machine": {
+                        "properties": {
+                            "type": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "project": {
+                        "properties": {
+                            "id": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "provider": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "service": {
+                        "properties": {
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            },
+            {% if synthetic_source | string | lower == "false" %}
+            "data_stream": {
+                "properties": {
+                    "dataset": {
+                        "type": "constant_keyword",
+                        "value": "kubernetes.state_replicaset"
+                    },
+                    "namespace": {
+                        "type": "constant_keyword",
+                        "value": "default"
+                    },
+                    "type": {
+                        "type": "constant_keyword",
+                        "value": "metrics"
+                    }
+                }
+            },
+            {% endif %}
+            "ecs": {
+                "properties": {
+                    "version": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            "elastic_agent": {
+                "properties": {
+                    "id": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "snapshot": {
+                        "type": "boolean"
+                    },
+                    "version": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            {% if synthetic_source | string | lower == "false" %}
+            "error": {
+                "properties": {
+                    "message": {
+                        "type": "match_only_text"
+                    }
+                }
+            },
+            {% endif %}
+            "event": {
+                "properties": {
+                    "dataset": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "duration": {
+                        "type": "long"
+                    },
+                    "module": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            },
+            "host": {
+                "properties": {
+                    "architecture": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "containerized": {
+                        "type": "boolean"
+                    },
+                    "hostname": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "ip": {
+                        "type": "ip"
+                    },
+                    "mac": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "name": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "os": {
+                        "properties": {
+                            "codename": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "family": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "kernel": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "platform": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "type": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "version": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            },
+            "kubernetes": {
+                "properties": {
+                    "deployment": {
+                        "properties": {
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "labels": {
+                        "properties": {
+                            "app": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "app-1": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "app-2": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "app-3": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "app-4": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "app_kubernetes_io/instance": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "app_kubernetes_io/name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "common_k8s_elastic_co/type": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "k8s-app": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "kibana_k8s_elastic_co/name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "kibana_k8s_elastic_co/version": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "pod-template-hash": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "version": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "namespace": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "replicaset": {
+                        "properties": {
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "replicas": {
+                                "properties": {
+                                    "available": {
+                                        "type": "long"
+                                    },
+                                    "desired": {
+                                        "type": "long"
+                                    },
+                                    "labeled": {
+                                        "type": "long"
+                                    },
+                                    "observed": {
+                                        "type": "long"
+                                    },
+                                    "ready": {
+                                        "type": "long"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "metricset": {
+                "properties": {
+                    "name": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "period": {
+                        "type": "long"
+                    }
+                }
+            },
+            "orchestrator": {
+                "properties": {
+                    "cluster": {
+                        "properties": {
+                            "name": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            },
+                            "url": {
+                                {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            },
+            "service": {
+                "properties": {
+                    "address": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    },
+                    "type": {
+                        {% if synthetic_source | string | lower == "false" %}"ignore_above": 1024,{% endif %}
+                        "type": "keyword"
+                    }
+                }
+            }
+        }
+    },
+    "settings": {
+        "index": {
+            "codec": "best_compression",
+            "hidden": "true",
+            "lifecycle": {
+                "name": "metrics"
+            },
+            "number_of_replicas": "{{number_of_replicas | default(0)}}",
+            "number_of_shards": "{{number_of_shards | default(1)}}",
+            "query": {
+                "default_field": [
+                    "message"
+                ]
+            },
+            "routing": {
+                "allocation": {
+                    "include": {
+                        "_tier_preference": "data_hot"
+                    }
+                }
+            }
+        }
+    }
+}
