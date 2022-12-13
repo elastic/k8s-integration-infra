@@ -37,7 +37,7 @@ The purpose of this repo is to:
    User can select if they want their cluster to be monitored by either metricbeat/filebeat or elastic-agent in standalone mode by setting the appropriate values in variables `deployBeat`, `deployAgent`.
    Both options can be used.
 7. `terraform apply`
-8. Configure `kubectl` by running `gcloud container clusters get-credentials <cluster-name> --zone us-central1-c --project elastic-observability`
+8. Configure `kubectl` by running `gcloud container clusters get-credentials <cluster-name> --zone europe-west1 --project elastic-obs-integrations-dev`
    The correct command can be obtained from Kubernetes Engine in GCP.
 9. Check the cluster `kubectl get node`, `kubectl get pod -A`
 
@@ -45,7 +45,7 @@ The purpose of this repo is to:
 1. Bring up a kubernetes cluster with 3 nodes and no autoscaling, without provisioning Elasticsearch and without monitoring
 * Example configuration:
    ```
-      project_id              = "elastic-observability"
+      project_id              = "elastic-obs-integrations-dev"
       region                  = "europe-west1"
       cluster_name            = "test-k8s-cluster-simple"
       machine_type            = "e2-standard-4"
@@ -65,7 +65,7 @@ The purpose of this repo is to:
    Prerequisite is the existence of an elastic stack. 
 * Example configuration:
    ```
-      project_id              = "elastic-observability"
+      project_id              = "elastic-obs-integrations-dev"
       region                  = "europe-west1"
       cluster_name            = "test-k8s-cluster-autoscaling-beats"
       machine_type            = "e2-standard-4"
@@ -84,7 +84,7 @@ The purpose of this repo is to:
 3. Bring up a kubernetes cluster with 3 nodes and autoscaling up to 18 nodes, with Elasticsearch provisioning and with elastic-agent monitoring version 8.3.0.
 * Example configuration:
    ```
-      project_id              = "elastic-observability"
+      project_id              = "elastic-obs-integrations-dev"
       region                  = "europe-west1"
       cluster_name            = "test-k8s-cluster-autoscaling-elasticsearch-agent"
       machine_type            = "e2-standard-4"

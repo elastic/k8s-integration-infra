@@ -1,4 +1,4 @@
-project_id              = "elastic-observability"
+project_id              = "elastic-obs-integrations-dev"
 region                  = "europe-west1"
 cluster_name            = "test-k8s"
 machine_type            = "e2-standard-4"
@@ -10,6 +10,6 @@ es_user                 = "elastic"
 es_host                 = ""
 deployBeat              = false
 deployAgent             = true
-imageTag                = "8.3.0-SNAPSHOT"
+imageTag                = "8.5.0-SNAPSHOT"
 namespace               = "kube-system"
-node_version            = "1.21.11-gke.1900"
+node_version            = "1.23.11-gke.300"

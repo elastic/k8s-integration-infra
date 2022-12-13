@@ -1,18 +1,26 @@
+variable "resource_labels" {
+  default = {
+    org = "obs"
+    team = "cloud-native-observability"
+    project = "kubernetes-scale"
+    division = "engineering"
+  }
+  description = "Kubernetes cluster-wide resource labels"
+}
+
 # GKE cluster
 resource "google_container_cluster" "primary" {
   name     = var.cluster_name
   location = var.region
-
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
-  //remove_default_node_pool = true
+  remove_default_node_pool = true
   initial_node_count       = 1
-  node_version       = var.node_version
-  min_master_version = var.node_version
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
   ip_allocation_policy {}
+  resource_labels = "${var.resource_labels}"
 }
 
 # Separately Managed Node Pool
@@ -21,7 +29,7 @@ resource "google_container_node_pool" "primary_nodes" {
   location   = var.region
   cluster    = google_container_cluster.primary.name
   node_count = var.gke_num_nodes
-
+  version = var.node_version
   node_config {
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
