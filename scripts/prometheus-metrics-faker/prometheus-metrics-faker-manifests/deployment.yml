@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prometheus-metrics-faker
+  name: prometheus-metrics-faker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-metrics-faker
+  template:
+    metadata:
+      labels:
+        app: prometheus-metrics-faker
+    spec:
+      ## uncomment if needed
+      # imagePullSecrets:
+      #   - name: gcr-json-key
+      containers:
+      - image: prometheus-metrics-faker:0.6 # change the image
+        args: ["--counter=250", "--labels=3", "--cardinality=200"]
+        imagePullPolicy: IfNotPresent
+        name: prometheus-metrics-faker
+        ports:
+        - containerPort: 9000
+          protocol: TCP
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 9000
+        #     scheme: HTTP
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 9000
+        #     scheme: HTTP
+        # resources:
+        #   limits:
+        #     cpu: 100m
+        #     memory: 100Mi
+        #   requests:
+        #     cpu: 50m
+        #     memory: 50Mi
