@@ -47,6 +47,8 @@ base_url=args.elasticsearch_host+"/_watcher/watch/"
 headersList = {"Content-Type": "application/json"}
 
 for watcher in watchers:
+    if len(watcher.split(".disabled")) > 1:
+        continue
     # Create the watcher
 
     f = open('./watchers/'+watcher)
