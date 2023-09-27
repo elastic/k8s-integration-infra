@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -17,45 +18,6 @@ import (
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/client-go/util/retry"
 )
-
-var deployment = &appsv1.Deployment{
-	ObjectMeta: metav1.ObjectMeta{
-		Name: "demo-deployment",
-	},
-	Spec: appsv1.DeploymentSpec{
-		Replicas: int32Ptr(int32(1)),
-		Selector: &metav1.LabelSelector{
-			MatchLabels: map[string]string{
-				"app": "demo",
-			},
-		},
-		Template: apiv1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{
-					"app": "demo",
-				},
-				Annotations: map[string]string{
-					"key": "val",
-				},
-			},
-			Spec: apiv1.PodSpec{
-				Containers: []apiv1.Container{
-					{
-						Name:  "web",
-						Image: "nginx:1.12",
-						Ports: []apiv1.ContainerPort{
-							{
-								Name:          "http",
-								Protocol:      apiv1.ProtocolTCP,
-								ContainerPort: 80,
-							},
-						},
-					},
-				},
-			},
-		},
-	},
-}
 
 func main() {
 	// parse flags
@@ -70,6 +32,9 @@ func main() {
 	podLabels := flag.Int("podlabels", 1, "number of labels per pod")
 	podAnnotations := flag.Int("podannotations", 1, "number of annotations per pod")
 	delAll := flag.Bool("delete", false, "delete all")
+	addLogs := flag.Bool("logs", false, "Add logs in the pods created")
+	periodOfLogs := flag.Int("periodoflogs", 1, "How often to create a new log entry. Period in sec")
+
 	flag.Parse()
 
 	// use the current context in kubeconfig
@@ -98,7 +63,7 @@ func main() {
 		}
 
 		Dname := fmt.Sprintf("demo-deployment-%d", i)
-		err = createOrUpdateDeployment(Dname, Nname, client, *replicas, *podLabels, *podAnnotations)
+		err = createOrUpdateDeployment(*addLogs, Dname, Nname, client, *replicas, *podLabels, *podAnnotations, *periodOfLogs)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -147,13 +112,17 @@ func deleteNamespaces(client *kubernetes.Clientset) error {
 }
 
 // createOrUpdateDeployment creates a new namespace if it does not exist or updates it if it does
-func createOrUpdateDeployment(name, namespace string, client *kubernetes.Clientset, replicas, podLabels, podAnnotations int) error {
+func createOrUpdateDeployment(addLogs bool, name, namespace string, client *kubernetes.Clientset, replicas, podLabels, podAnnotations, periodOfLogs int) error {
 	deploymentsClient := client.AppsV1().Deployments(namespace)
 	result, getErr := deploymentsClient.Get(context.TODO(), name, metav1.GetOptions{})
 	if getErr != nil {
 		fmt.Printf("Deployment %s does not exist\n", name)
 		// Create Deployment
 		fmt.Println("Creating deployment...")
+		if addLogs {
+			period := strconv.Itoa(periodOfLogs)
+			deployment.Spec.Template.Spec.Containers[0].Command = []string{"/bin/sh", "-c", "while true ;do echo hello test log >> /proc/1/fd/1 ; sleep " + period + "; done;"}
+		}
 		deployment.Name = name
 		deployment.Spec.Replicas = int32Ptr(int32(replicas))
 		for i := 1; i <= podLabels; i++ {
@@ -200,3 +169,42 @@ func createOrUpdateDeployment(name, namespace string, client *kubernetes.Clients
 }
 
 func int32Ptr(i int32) *int32 { return &i }
+
+var deployment = &appsv1.Deployment{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "demo-deployment",
+	},
+	Spec: appsv1.DeploymentSpec{
+		Replicas: int32Ptr(int32(1)),
+		Selector: &metav1.LabelSelector{
+			MatchLabels: map[string]string{
+				"app": "demo",
+			},
+		},
+		Template: apiv1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: map[string]string{
+					"app": "demo",
+				},
+				Annotations: map[string]string{
+					"key": "val",
+				},
+			},
+			Spec: apiv1.PodSpec{
+				Containers: []apiv1.Container{
+					{
+						Name:  "web",
+						Image: "nginx:1.12",
+						Ports: []apiv1.ContainerPort{
+							{
+								Name:          "http",
+								Protocol:      apiv1.ProtocolTCP,
+								ContainerPort: 80,
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+}

@@ -115,6 +115,13 @@ Error: Kubernetes cluster unreachable: Get "https://35.239.222.162/version?timeo
 The above command will create 10 namespaces and deploy one demo nginx deployment in each one with
 as many 20 replicas as indicated in the `deployments` flag. Each pod will have 4 labels and 4 annotations.
 
+By default, no logs are being produced. If you want your pods to create logs run stress_test tool with --logs argument:
+
+` ./stress_test_k8s --kubeconfig=/Users/andreasgkizas/.kube/config --deployments=1 --namespaces=2 --podlabels=2 --podannotations=2 --logs --periodoflogs 2`
+
+--Periodoflogs (in sec): Default value is 1 sec
+
+
 ### Helper es_bench script (TSDB use case only)
 ####Prerequisite: Existence of 2 Elasticsearch Clusters. One with metricbeat index TSDB enabled and one without.
 
